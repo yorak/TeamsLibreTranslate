@@ -136,6 +136,11 @@ src/
 └── utils/          # Utility functions
 ```
 
+For detailed architecture documentation, see:
+- [Architecture Overview](docs/architecture.md) - System design and component details
+- [API Documentation](docs/api.md) - Class interfaces and usage examples
+- [System Diagrams](docs/diagrams/) - Visual system architecture and data flow diagrams
+
 ## Command Line Options
 
 - `--config`: Path to configuration file

@@ -6,6 +6,8 @@ Teams Translator follows a modular architecture designed for maintainability, te
 
 ## System Architecture
 
+![System Architecture](diagrams/system_architecture.png)
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Teams Translator                          │
@@ -56,6 +58,10 @@ Teams Translator follows a modular architecture designed for maintainability, te
 │  └─────────────────────┘  └─────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+## Class Diagram
+
+![Class Diagram](diagrams/class_diagram.png)
 
 ## Component Details
 
@@ -144,6 +150,14 @@ Teams Translator follows a modular architecture designed for maintainability, te
 
 ## Data Flow
 
+![Data Flow Diagram](diagrams/data_flow.png)
+
+### Simplified Data Flow
+
+For a high-level overview of the data flow, see this simplified diagram:
+
+![Simple Data Flow](diagrams/simple_data_flow.png)
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   User starts   │    │   Application   │    │   Display       │
@@ -208,6 +222,18 @@ Teams Translator follows a modular architecture designed for maintainability, te
         └─────────────────────────────────────────────────────────┘
 ```
 
+## Sequence Diagram
+
+The following sequence diagram shows the interaction flow during a typical translation session:
+
+![Sequence Diagram](diagrams/sequence_diagram.png)
+
+## State Diagram
+
+The application state transitions are shown in the following diagram:
+
+![State Diagram](diagrams/state_diagram.png)
+
 ## Error Handling Strategy
 
 The application implements comprehensive error handling at multiple levels:
@@ -259,6 +285,12 @@ The architecture supports extension through:
 3. **Display Options**: Different UI frameworks and display modes
 4. **Configuration Formats**: Support for YAML, TOML, etc.
 5. **Language Support**: Dynamic language detection and switching
+
+## Deployment Architecture
+
+The following diagram shows the deployment architecture and system dependencies:
+
+![Deployment Diagram](diagrams/deployment_diagram.png)
 
 ## Testing Strategy
 
