@@ -1,0 +1,14 @@
+# Core dependencies
+pyautogui>=0.9.54
+pyperclip>=1.8.2
+requests>=2.31.0
+screeninfo>=0.8.1
+
+# GUI dependencies
+tkinter # Usually included with Python
+
+# Optional dependencies for enhanced functionality
+# Uncomment as needed:
+# python-dotenv>=1.0.0  # For environment variable management
+# pyyaml>=6.0.1         # For YAML configuration support
+# coloredlogs>=15.0.1   # For colored logging output

@@ -1,0 +1,187 @@
+@startuml sequence_diagram
+skinparam backgroundColor #FAFAFA
+skinparam handwritten false
+skinparam monochrome false
+skinparam shadowing false
+
+skinparam participant {
+    BackgroundColor #E8F4FD
+    BorderColor #2E86AB
+    FontColor #2E86AB
+    FontSize 11
+    FontName Arial
+}
+
+skinparam actor {
+    BackgroundColor #FFE4E1
+    BorderColor #DC143C
+    FontColor #DC143C
+    FontSize 11
+    FontName Arial
+}
+
+skinparam note {
+    BackgroundColor #F0FFF0
+    BorderColor #228B22
+    FontColor #228B22
+    FontSize 9
+}
+
+title <size:20><color:#2E86AB>Teams Translator - Sequence Diagram</color></size>
+
+actor User as U
+participant "TeamsTranslatorApp" as App
+participant "TranslationDisplayWindow" as Window
+participant "TextCapture" as Capture
+participant "TranslationService" as Translator
+participant "LibreTranslate API" as API
+participant "System Clipboard" as Clipboard
+
+== Initialization ==
+
+U -> App : start application
+activate App
+
+App -> App : load configuration
+note right: Load from config.json\nor use defaults
+
+App -> Translator : create service
+activate Translator
+Translator -> API : check availability
+API --> Translator : service status
+Translator --> App : service ready
+
+App -> Capture : create capture service
+activate Capture
+Capture --> App : capture ready
+
+App -> Window : create display window
+activate Window
+Window -> Window : configure window
+Window --> App : window ready
+
+== Startup Sequence ==
+
+App -> Window : start countdown
+Window -> Window : display countdown
+note left: Show "Starting in X seconds"
+
+loop countdown timer
+    Window -> Window : update display
+    Window -> U : show countdown
+end
+
+Window -> App : countdown complete
+App -> Capture : mark_all_previous_translated()
+Capture -> Clipboard : grab current text
+activate Clipboard
+Clipboard --> Capture : clipboard content
+deactivate Clipboard
+Capture -> Capture : cache existing text
+Capture --> App : initialization complete
+
+== Main Translation Loop ==
+
+App -> Window : start translation updates
+
+loop translation cycle
+    Window -> App : request translation update
+    App -> Capture : get_transcript_to_translate()
+    
+    Capture -> Clipboard : grab_text()
+    activate Clipboard
+    Clipboard -> Clipboard : select all (Ctrl+A)
+    Clipboard -> Clipboard : copy (Ctrl+C)
+    Clipboard --> Capture : text content
+    deactivate Clipboard
+    
+    Capture -> Capture : parse text for changes
+    
+    alt new text found
+        Capture --> App : text to translate
+        
+        App -> App : check translation cache
+        
+        alt not in cache
+            App -> Translator : translate(text)
+            Translator -> API : POST /translate
+            activate API
+            
+            note over API
+                JSON request:
+                {
+                  "q": "text to translate",
+                  "source": "fi",
+                  "target": "en"
+                }
+            end note
+            
+            API -> API : process translation
+            API --> Translator : translation result
+            deactivate API
+            
+            note over Translator
+                JSON response:
+                {
+                  "translatedText": "translated text"
+                }
+            end note
+            
+            Translator --> App : translated text
+            App -> App : cache translation
+            App -> Capture : mark_as_translated()
+        else cached translation
+            App -> App : use cached result
+        end
+        
+        App -> Window : update_text(translation)
+        Window -> Window : display translation
+        Window -> U : show translated text
+        
+    else no new text
+        Capture --> App : None
+        App -> App : no update needed
+    end
+    
+    Window -> Window : wait for next cycle
+    note left: Delay based on rate_delay
+end
+
+== Error Handling ==
+
+alt translation error
+    Translator -> API : translate request
+    API --> Translator : error response
+    Translator -> Translator : log error
+    Translator --> App : None (failed)
+    App -> App : log translation failure
+    
+    note over App
+        Error is logged but application
+        continues running normally
+    end note
+end
+
+alt capture error
+    Capture -> Clipboard : grab_text()
+    Clipboard --> Capture : exception
+    Capture -> Capture : log error
+    Capture --> App : empty string
+    App -> App : handle gracefully
+end
+
+== Shutdown ==
+
+U -> Window : close window
+Window -> Window : on_closing()
+Window -> App : stop application
+App -> App : cleanup resources
+App -> Translator : shutdown
+deactivate Translator
+App -> Capture : cleanup
+deactivate Capture
+App -> Window : stop
+deactivate Window
+deactivate App
+
+@enduml

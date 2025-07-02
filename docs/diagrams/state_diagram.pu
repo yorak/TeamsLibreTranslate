@@ -1,0 +1,149 @@
+@startuml state_diagram
+skinparam backgroundColor #FAFAFA
+skinparam handwritten false
+skinparam monochrome false
+skinparam shadowing false
+
+skinparam state {
+    BackgroundColor #E8F4FD
+    BorderColor #2E86AB
+    FontColor #2E86AB
+    FontSize 11
+    FontName Arial
+    FontStyle bold
+}
+
+skinparam note {
+    BackgroundColor #F0FFF0
+    BorderColor #228B22
+    FontColor #228B22
+    FontSize 9
+}
+
+title <size:20><color:#2E86AB>Teams Translator - State Diagram</color></size>
+
+[*] --> Initializing : Application Start
+
+state Initializing {
+    [*] --> LoadingConfig : Load configuration
+    LoadingConfig --> ValidatingConfig : Config loaded
+    ValidatingConfig --> InitializingServices : Config valid
+    InitializingServices --> CheckingPrerequisites : Services created
+    CheckingPrerequisites --> Ready : All checks passed
+    
+    ValidatingConfig --> ConfigError : Invalid config
+    CheckingPrerequisites --> PrerequisiteError : LibreTranslate unavailable
+    
+    ConfigError --> [*] : Exit with error
+    PrerequisiteError --> [*] : Exit with error
+}
+
+Ready --> CreatingWindow : Create display window
+CreatingWindow --> StartingCountdown : Window created
+
+state StartingCountdown {
+    [*] --> CountdownActive : Begin countdown
+    CountdownActive --> CountdownActive : Update display
+    CountdownActive --> CountdownComplete : Timer expired
+}
+
+CountdownComplete --> MarkingExistingText : Initialize session
+MarkingExistingText --> TranslationLoop : Existing text cached
+
+state TranslationLoop {
+    [*] --> Monitoring : Begin monitoring
+    
+    state Monitoring {
+        [*] --> CapturingText : Capture screen
+        CapturingText --> ParsingText : Text captured
+        ParsingText --> CheckingForChanges : Text parsed
+        
+        CheckingForChanges --> NoChanges : No new text
+        CheckingForChanges --> NewTextFound : New text detected
+        
+        NoChanges --> WaitingForNext : No action needed
+        NewTextFound --> DeterminingTranslationNeed : Analyze text
+        
+        DeterminingTranslationNeed --> AlreadyTranslated : Text in cache
+        DeterminingTranslationNeed --> NeedsTranslation : New text to translate
+        
+        AlreadyTranslated --> WaitingForNext : Use cached result
+        NeedsTranslation --> Translating : Send to API
+        
+        state Translating {
+            [*] --> SendingRequest : HTTP POST
+            SendingRequest --> AwaitingResponse : Request sent
+            AwaitingResponse --> ProcessingResponse : Response received
+            ProcessingResponse --> TranslationSuccess : Valid response
+            ProcessingResponse --> TranslationError : Invalid response
+            
+            TranslationSuccess --> [*] : Translation complete
+            TranslationError --> [*] : Log error
+        }
+        
+        Translating --> UpdatingDisplay : Translation received
+        UpdatingDisplay --> CachingResult : Display updated
+        CachingResult --> WaitingForNext : Result cached
+        
+        WaitingForNext --> [*] : Cycle complete
+    }
+    
+    Monitoring --> Monitoring : Continue monitoring
+    Monitoring --> ShuttingDown : User closes window
+}
+
+state ShuttingDown {
+    [*] --> CleaningUp : Cleanup resources
+    CleaningUp --> SavingState : Resources cleaned
+    SavingState --> [*] : State saved
+}
+
+ShuttingDown --> [*] : Application exit
+
+' Error states
+state ErrorHandling {
+    TranslationError --> LoggingError : Log translation failure
+    LoggingError --> ContinueOperation : Error logged
+    ContinueOperation --> TranslationLoop : Resume normal operation
+    
+    CaptureError --> LoggingError : Log capture failure
+    ServiceError --> LoggingError : Log service failure
+}
+
+TranslationLoop --> ErrorHandling : Error occurred
+ErrorHandling --> TranslationLoop : Error handled
+
+' Notes
+note right of Initializing
+    <b>Initialization Phase:</b>
+    • Load configuration from file
+    • Validate settings
+    • Initialize services
+    • Check LibreTranslate availability
+end note
+
+note left of StartingCountdown
+    <b>Countdown Phase:</b>
+    • Give user time to position windows
+    • Display countdown timer
+    • Prepare for text capture
+end note
+
+note bottom of TranslationLoop
+    <b>Main Operation:</b>
+    • Continuous text monitoring
+    • Change detection
+    • Translation processing
+    • Display updates
+    • Error handling
+end note
+
+note top of ErrorHandling
+    <b>Error Recovery:</b>
+    • Log all errors
+    • Continue operation
+    • Graceful degradation
+    • User notification
+end note
+
+@enduml

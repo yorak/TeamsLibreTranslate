@@ -1,0 +1,24 @@
+{
+  "translation": {
+    "libretranslate_url": "http://localhost:5000/translate",
+    "api_key": "",
+    "source_language": "de",
+    "target_language": "en",
+    "rate_delay": 1.5,
+    "translate_always_after": 4.0
+  },
+  "ui": {
+    "screen_index": 0,
+    "wait_start_time": 5,
+    "window_width_ratio": 0.75,
+    "window_height_ratio": 0.25,
+    "font_family": "Arial",
+    "font_size": 18,
+    "font_weight": "normal"
+  },
+  "capture": {
+    "split_marker": "Klaus Mueller",
+    "clipboard_delay": 0.3,
+    "selection_delay": 0.1
+  }
+}

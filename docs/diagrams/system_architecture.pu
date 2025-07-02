@@ -1,0 +1,143 @@
+@startuml system_architecture
+skinparam backgroundColor #FAFAFA
+skinparam handwritten false
+skinparam monochrome false
+skinparam shadowing false
+
+skinparam component {
+    BackgroundColor #E8F4FD
+    BorderColor #2E86AB
+    FontColor #2E86AB
+    FontSize 12
+    FontName Arial
+}
+
+skinparam package {
+    BackgroundColor #F0F8FF
+    BorderColor #1E5F8B
+    FontColor #1E5F8B
+    FontSize 14
+    FontName Arial
+    FontStyle bold
+}
+
+skinparam rectangle {
+    BackgroundColor #E8F8E8
+    BorderColor #4A7C59
+    FontColor #4A7C59
+    FontSize 11
+}
+
+skinparam note {
+    BackgroundColor #FFF8DC
+    BorderColor #DAA520
+    FontColor #8B4513
+    FontSize 10
+}
+
+title <size:20><color:#2E86AB>Teams Translator - System Architecture</color></size>
+
+package "**Teams Translator Application**" as app {
+    
+    package "**User Interface Layer**" as ui_layer {
+        component "TranslationDisplayWindow" as display {
+            rectangle "Tkinter Window" as tkinter
+            rectangle "Always-on-top Display" as ontop
+            rectangle "Countdown Timer" as countdown
+            rectangle "Auto-refresh Loop" as refresh
+        }
+    }
+    
+    package "**Application Layer**" as app_layer {
+        component "TeamsTranslatorApp" as main_app {
+            rectangle "Service Orchestration" as orchestration
+            rectangle "Translation Caching" as cache
+            rectangle "Error Handling" as error_handling
+            rectangle "Logging System" as logging
+        }
+    }
+    
+    package "**Business Logic Layer**" as business_layer {
+        component "TranslationService" as translator {
+            rectangle "LibreTranslate Client" as client
+            rectangle "Request Management" as requests
+            rectangle "Response Parsing" as parsing
+            rectangle "Service Health Check" as health
+        }
+        
+        component "TextCapture" as capture {
+            rectangle "Screen Capture" as screen
+            rectangle "Text Extraction" as extraction
+            rectangle "Change Detection" as detection
+            rectangle "Translation Tracking" as tracking
+        }
+    }
+    
+    package "**Configuration Layer**" as config_layer {
+        component "AppConfig" as config {
+            rectangle "JSON File I/O" as json_io
+            rectangle "Environment Variables" as env_vars
+            rectangle "Default Values" as defaults
+            rectangle "Validation" as validation
+        }
+    }
+}
+
+package "**External Dependencies**" as external {
+    component "System Clipboard" as clipboard {
+        rectangle "pyautogui" as pyautogui
+        rectangle "pyperclip" as pyperclip
+        rectangle "Screen Operations" as screen_ops
+    }
+    
+    component "LibreTranslate API" as api {
+        rectangle "HTTP REST API" as rest
+        rectangle "JSON Protocol" as json_protocol
+        rectangle "Language Models" as models
+    }
+}
+
+' Relationships
+main_app --> display : manages
+main_app --> translator : uses
+main_app --> capture : uses
+main_app --> config : loads
+
+display --> tkinter : renders with
+capture --> clipboard : captures via
+translator --> api : translates via
+
+' Data flow arrows
+main_app ..> cache : stores translations
+capture ..> detection : detects changes
+translator ..> health : monitors
+config ..> validation : validates settings
+
+note right of display
+    <b>UI Features:</b>
+    • Always-on-top overlay
+    • Multi-monitor support
+    • Customizable fonts & sizing
+    • Countdown before start
+    • Real-time text updates
+end note
+
+note left of translator
+    <b>Translation Features:</b>
+    • Multiple language support
+    • Error handling & retries
+    • Service availability check
+    • Configurable timeouts
+    • Response validation
+end note
+
+note bottom of capture
+    <b>Capture Features:</b>
+    • Smart text extraction
+    • Speaker change detection
+    • Duplicate avoidance
+    • Timing optimization
+    • History tracking
+end note
+
+@enduml

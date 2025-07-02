@@ -1,0 +1,24 @@
+{
+  "translation": {
+    "libretranslate_url": "http://localhost:5000/translate",
+    "api_key": "",
+    "source_language": "fi",
+    "target_language": "en",
+    "rate_delay": 1.0,
+    "translate_always_after": 5.0
+  },
+  "ui": {
+    "screen_index": 1,
+    "wait_start_time": 10,
+    "window_width_ratio": 0.8333333333333334,
+    "window_height_ratio": 0.2,
+    "font_family": "Helvetica",
+    "font_size": 20,
+    "font_weight": "bold"
+  },
+  "capture": {
+    "split_marker": "Jussi Rasku (TAU)",
+    "clipboard_delay": 0.5,
+    "selection_delay": 0.2
+  }
+}

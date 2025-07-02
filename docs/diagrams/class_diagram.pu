@@ -1,0 +1,173 @@
+@startuml class_diagram
+skinparam backgroundColor #FAFAFA
+skinparam handwritten false
+skinparam monochrome false
+skinparam shadowing false
+
+skinparam class {
+    BackgroundColor #E8F4FD
+    BorderColor #2E86AB
+    FontColor #2E86AB
+    FontSize 11
+    FontName Arial
+    AttributeFontColor #4A4A4A
+    AttributeFontSize 10
+}
+
+skinparam interface {
+    BackgroundColor #E8F8E8
+    BorderColor #4A7C59
+    FontColor #4A7C59
+    FontSize 11
+    FontName Arial
+}
+
+skinparam note {
+    BackgroundColor #FFF8DC
+    BorderColor #DAA520
+    FontColor #8B4513
+    FontSize 10
+}
+
+title <size:20><color:#2E86AB>Teams Translator - Class Diagram</color></size>
+
+package "Configuration" {
+    class AppConfig {
+        +translation: TranslationConfig
+        +ui: UIConfig
+        +capture: CaptureConfig
+        --
+        +from_dict(config_dict: Dict) : AppConfig
+        +load_from_file(path: str) : AppConfig
+        +save_to_file(path: str) : void
+    }
+    
+    class TranslationConfig {
+        +libretranslate_url: str
+        +api_key: str
+        +source_language: str
+        +target_language: str
+        +rate_delay: float
+        +translate_always_after: float
+    }
+    
+    class UIConfig {
+        +screen_index: int
+        +wait_start_time: int
+        +window_width_ratio: float
+        +window_height_ratio: float
+        +font_family: str
+        +font_size: int
+        +font_weight: str
+    }
+    
+    class CaptureConfig {
+        +split_marker: str
+        +clipboard_delay: float
+        +selection_delay: float
+    }
+}
+
+package "Core Application" {
+    class TeamsTranslatorApp {
+        -config: AppConfig
+        -translation_service: TranslationService
+        -text_capture: TextCapture
+        -display_window: TranslationDisplayWindow
+        -translation_cache: Dict[str, str]
+        -logger: Logger
+        --
+        +grab_and_translate() : Optional[str]
+        +check_prerequisites() : bool
+        +start_translation_session() : void
+        +run() : int
+        -_setup_logging() : Logger
+    }
+}
+
+package "Business Logic" {
+    class TranslationService {
+        -config: TranslationConfig
+        -logger: Logger
+        --
+        +translate(text: str, source_lang: str, target_lang: str) : Optional[str]
+        +is_service_available() : bool
+    }
+    
+    class TextCapture {
+        -config: CaptureConfig
+        -logger: Logger
+        -already_translated: Set[str]
+        -prev_translated_complete_line: str
+        -prev_translation_at: float
+        --
+        +grab_text() : str
+        +mark_all_previous_translated() : void
+        +get_transcript_to_translate(translate_always_after: float) : Optional[str]
+        +mark_as_translated(text: str) : void
+        +reset_translation_cache() : void
+    }
+}
+
+package "User Interface" {
+    class TranslationDisplayWindow {
+        -config: UIConfig
+        -update_callback: Optional[Callable]
+        -root: tk.Tk
+        -label: tk.Label
+        -is_running: bool
+        -logger: Logger
+        --
+        +create_window() : void
+        +update_text(text: str) : void
+        +start_countdown(seconds: int, on_complete: Callable) : void
+        +start_translation_updates(update_interval_ms: int) : void
+        +run() : void
+        +stop() : void
+        +on_closing() : void
+        -get_screen_size() : tuple[int, int]
+        -_countdown_recursive(count: int, on_complete: Callable) : void
+    }
+}
+
+' Relationships
+AppConfig *-- TranslationConfig
+AppConfig *-- UIConfig
+AppConfig *-- CaptureConfig
+
+TeamsTranslatorApp --> AppConfig : uses
+TeamsTranslatorApp --> TranslationService : manages
+TeamsTranslatorApp --> TextCapture : manages
+TeamsTranslatorApp --> TranslationDisplayWindow : manages
+
+TranslationService --> TranslationConfig : configured by
+TextCapture --> CaptureConfig : configured by
+TranslationDisplayWindow --> UIConfig : configured by
+
+TranslationDisplayWindow --> TeamsTranslatorApp : calls back
+
+note top of TeamsTranslatorApp
+    <b>Main orchestrator</b>
+    Coordinates all services
+    and manages application lifecycle
+end note
+
+note right of TranslationService
+    <b>API Client</b>
+    Handles LibreTranslate
+    communication and errors
+end note
+
+note left of TextCapture
+    <b>Screen Monitor</b>
+    Captures and processes
+    text from Teams window
+end note
+
+note bottom of TranslationDisplayWindow
+    <b>UI Display</b>
+    Shows translations in
+    always-on-top overlay
+end note
+
+@enduml

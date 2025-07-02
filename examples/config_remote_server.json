@@ -1,0 +1,24 @@
+{
+  "translation": {
+    "libretranslate_url": "https://translate.example.com/translate",
+    "api_key": "your_api_key_here",
+    "source_language": "auto",
+    "target_language": "en",
+    "rate_delay": 2.0,
+    "translate_always_after": 6.0
+  },
+  "ui": {
+    "screen_index": 1,
+    "wait_start_time": 15,
+    "window_width_ratio": 0.9,
+    "window_height_ratio": 0.3,
+    "font_family": "Times New Roman",
+    "font_size": 22,
+    "font_weight": "bold"
+  },
+  "capture": {
+    "split_marker": "Speaker Name",
+    "clipboard_delay": 0.7,
+    "selection_delay": 0.3
+  }
+}

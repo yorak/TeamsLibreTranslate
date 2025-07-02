@@ -1,0 +1,117 @@
+@startuml data_flow
+skinparam backgroundColor #FAFAFA
+skinparam handwritten false
+skinparam monochrome false
+skinparam shadowing false
+
+skinparam activity {
+    BackgroundColor #E8F4FD
+    BorderColor #2E86AB
+    FontColor #2E86AB
+    FontSize 11
+    FontName Arial
+}
+
+skinparam decision {
+    BackgroundColor #FFE4E1
+    BorderColor #DC143C
+    FontColor #DC143C
+    FontSize 10
+    FontName Arial
+}
+
+skinparam note {
+    BackgroundColor #F0FFF0
+    BorderColor #228B22
+    FontColor #228B22
+    FontSize 9
+}
+
+title <size:20><color:#2E86AB>Teams Translator - Data Flow Diagram</color></size>
+
+start
+
+:Application starts;
+note right: Load configuration\nand initialize services
+
+:Create display window;
+note left: Configure window size,\nposition, and appearance
+
+:Start countdown timer;
+note right: Give user time to\nposition Teams window
+
+if (Countdown complete?) then (yes)
+    :Mark existing text as translated;
+    note left: Capture current screen\nand cache all visible text
+    
+    :Begin translation loop;
+    note right: Start continuous\nmonitoring cycle
+    
+    while (Application running?) is (yes)
+        
+        :Capture screen text;
+        note left: Select all and copy\nto clipboard via hotkeys
+        
+        :Parse captured text;
+        note right: Split by speaker marker\nand identify new content
+        
+        if (New text found?) then (yes)
+            if (Complete line?) then (yes)
+                :Extract complete line;
+                note left: Process finished\nspeaker segment
+            else (no)
+                if (Timeout reached?) then (yes)
+                    :Extract incomplete line;
+                    note right: Force translation\nof partial content
+                else (no)
+                    :Skip translation;
+                    note left: Wait for more\ncomplete content
+                    goto continue
+                endif
+            endif
+            
+            if (Already translated?) then (yes)
+                :Skip translation;
+                note right: Use cached result\nto avoid duplicate API calls
+                goto continue
+            else (no)
+                :Send to LibreTranslate;
+                note left: HTTP POST request\nwith source/target languages
+                
+                if (Translation successful?) then (yes)
+                    :Cache translation;
+                    note right: Store result to\navoid future duplicates
+                    
+                    :Update display window;
+                    note left: Show translated\ntext in overlay
+                    
+                    :Mark as translated;
+                    note right: Add to processed\ntext tracking
+                else (no)
+                    :Log error;
+                    note left: Record failure\nfor debugging
+                endif
+            endif
+        else (no)
+            :No action needed;
+            note right: No new content\nto process
+        endif
+        
+        label continue
+        :Wait for next cycle;
+        note left: Delay based on\nrate_delay setting
+        
+    endwhile (no)
+    
+    :Application shutdown;
+    note right: User closed window\nor interrupted process
+    
+else (no)
+    :Continue countdown;
+    note left: Update countdown\ndisplay and wait
+    goto start
+endif
+
+stop
+
+@enduml

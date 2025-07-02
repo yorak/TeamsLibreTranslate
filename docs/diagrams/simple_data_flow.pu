@@ -1,0 +1,70 @@
+@startuml simple_data_flow
+skinparam backgroundColor #FAFAFA
+skinparam handwritten false
+skinparam monochrome false
+skinparam shadowing false
+
+skinparam rectangle {
+    BackgroundColor #E8F4FD
+    BorderColor #2E86AB
+    FontColor #2E86AB
+    FontSize 11
+    FontName Arial
+}
+
+skinparam arrow {
+    Color #2E86AB
+    FontColor #2E86AB
+    FontSize 10
+}
+
+title <size:20><color:#2E86AB>Teams Translator - Simplified Data Flow</color></size>
+
+rectangle "User starts\napplication" as start
+rectangle "Load configuration\nand initialize" as init
+rectangle "Create display\nwindow" as window
+rectangle "Start countdown\ntimer" as countdown
+rectangle "Mark existing text\nas translated" as mark
+rectangle "Begin translation\nloop" as loop
+
+rectangle "Capture screen\ntext via clipboard" as capture
+rectangle "Parse text and\nidentify changes" as parse
+rectangle "Check if translation\nneeded" as check
+rectangle "Send request to\nLibreTranslate API" as translate
+rectangle "Update display\nwith translation" as display
+rectangle "Cache result and\nwait for next cycle" as cache
+
+start --> init
+init --> window
+window --> countdown
+countdown --> mark
+mark --> loop
+
+loop --> capture
+capture --> parse
+parse --> check
+check --> translate : new text
+check --> cache : no change
+translate --> display
+display --> cache
+cache --> capture : continue loop
+
+note right of capture
+    Uses pyautogui and pyperclip
+    to select all text and copy
+    to clipboard
+end note
+
+note left of translate
+    HTTP POST request with
+    JSON payload containing
+    text and language codes
+end note
+
+note bottom of display
+    Updates always-on-top
+    Tkinter window with
+    translated text
+end note
+
+@enduml

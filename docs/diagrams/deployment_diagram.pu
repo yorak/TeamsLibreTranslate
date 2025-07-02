@@ -1,0 +1,198 @@
+@startuml deployment_diagram
+skinparam backgroundColor #FAFAFA
+skinparam handwritten false
+skinparam monochrome false
+skinparam shadowing false
+
+skinparam node {
+    BackgroundColor #E8F4FD
+    BorderColor #2E86AB
+    FontColor #2E86AB
+    FontSize 12
+    FontName Arial
+    FontStyle bold
+}
+
+skinparam component {
+    BackgroundColor #E8F8E8
+    BorderColor #4A7C59
+    FontColor #4A7C59
+    FontSize 11
+    FontName Arial
+}
+
+skinparam database {
+    BackgroundColor #FFE4E1
+    BorderColor #DC143C
+    FontColor #DC143C
+    FontSize 11
+    FontName Arial
+}
+
+skinparam cloud {
+    BackgroundColor #F0F8FF
+    BorderColor #4682B4
+    FontColor #4682B4
+    FontSize 11
+    FontName Arial
+}
+
+skinparam note {
+    BackgroundColor #FFF8DC
+    BorderColor #DAA520
+    FontColor #8B4513
+    FontSize 10
+}
+
+title <size:20><color:#2E86AB>Teams Translator - Deployment Diagram</color></size>
+
+node "**User Workstation**" as workstation {
+    
+    node "**Desktop Environment**" as desktop {
+        component "Microsoft Teams" as teams {
+            component "Live Captions" as captions
+            component "Meeting Window" as meeting
+        }
+        
+        component "Teams Translator" as translator {
+            component "main.py" as main
+            component "TranslationDisplayWindow" as display
+            component "TextCapture Service" as capture
+            component "Config Management" as config
+        }
+        
+        component "System Services" as system {
+            component "Clipboard Manager" as clipboard
+            component "Screen Capture" as screen
+            component "Window Manager" as wm
+        }
+    }
+    
+    database "**Local Storage**" as storage {
+        component "config.json" as config_file
+        component "translation.log" as log_file
+        component "cache.json" as cache_file
+    }
+}
+
+node "**Translation Server**" as server {
+    component "LibreTranslate API" as libretranslate {
+        component "Translation Engine" as engine
+        component "Language Models" as models
+        component "REST API" as api
+    }
+    
+    database "**Model Storage**" as model_storage {
+        component "Finnish Model" as fi_model
+        component "English Model" as en_model
+        component "German Model" as de_model
+        component "Other Models" as other_models
+    }
+}
+
+cloud "**Network**" as network {
+    component "HTTP/HTTPS" as http
+    component "JSON API" as json_api
+}
+
+' Alternative deployment options
+node "**Docker Container**" as docker {
+    component "LibreTranslate Service" as docker_translate
+    component "Model Volume" as docker_models
+}
+
+node "**Cloud Translation Service**" as cloud_service {
+    component "Hosted LibreTranslate" as hosted
+    component "API Gateway" as gateway
+    component "Load Balancer" as lb
+}
+
+' Connections
+teams --> capture : screen capture
+capture --> clipboard : text extraction
+capture --> screen : window monitoring
+display --> wm : overlay window
+
+translator --> config_file : read/write
+translator --> log_file : write logs
+translator --> cache_file : translation cache
+
+translator --> network : HTTP requests
+network --> libretranslate : API calls
+libretranslate --> model_storage : load models
+
+' Alternative connections
+translator ..> docker : alternative\nlocal deployment
+translator ..> cloud_service : alternative\ncloud deployment
+
+note right of teams
+    <b>Requirements:</b>
+    • Live captions enabled
+    • Meeting window visible
+    • Clipboard access allowed
+end note
+
+note left of translator
+    <b>Dependencies:</b>
+    • Python 3.8+
+    • pyautogui, pyperclip
+    • tkinter (usually built-in)
+    • requests library
+end note
+
+note bottom of server
+    <b>Server Options:</b>
+    • Local installation
+    • Docker container
+    • Remote server
+    • Cloud service
+end note
+
+note top of network
+    <b>Network Requirements:</b>
+    • HTTP/HTTPS connectivity
+    • JSON API support
+    • Optional: API key auth
+end note
+
+' Deployment scenarios
+package "**Deployment Scenarios**" as scenarios {
+    
+    rectangle "**Scenario 1: Local Development**" as local {
+        note as local_note
+            • LibreTranslate on localhost:5000
+            • All components on same machine
+            • Fast response times
+            • No network dependencies
+        end note
+    }
+    
+    rectangle "**Scenario 2: Docker Deployment**" as docker_scenario {
+        note as docker_note
+            • LibreTranslate in Docker container
+            • Isolated environment
+            • Easy model management
+            • Reproducible setup
+        end note
+    }
+    
+    rectangle "**Scenario 3: Remote Server**" as remote {
+        note as remote_note
+            • LibreTranslate on dedicated server
+            • Shared by multiple users
+            • Centralized model management
+            • Network latency considerations
+        end note
+    }
+    
+    rectangle "**Scenario 4: Cloud Service**" as cloud_scenario {
+        note as cloud_note
+            • Hosted LibreTranslate service
+            • High availability
+            • Managed infrastructure
+            • API key authentication
+        end note
+    }
+}
+
+@enduml
