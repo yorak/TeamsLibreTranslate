@@ -8,57 +8,6 @@ Teams Translator follows a modular architecture designed for maintainability, te
 
 ![System Architecture](diagrams/system_architecture.png)
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Teams Translator                          │
-├─────────────────────────────────────────────────────────────────┤
-│                     User Interface Layer                        │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │                 TranslationDisplayWindow                     │ │
-│  │  - Tkinter-based overlay window                             │ │
-│  │  - Always-on-top translation display                       │ │
-│  │  - Countdown timer                                          │ │
-│  │  - Auto-updating text display                              │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-├─────────────────────────────────────────────────────────────────┤
-│                     Application Layer                           │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │                 TeamsTranslatorApp                          │ │
-│  │  - Main application orchestration                           │ │
-│  │  - Service coordination                                     │ │
-│  │  - Translation caching                                      │ │
-│  │  - Error handling and logging                              │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-├─────────────────────────────────────────────────────────────────┤
-│                     Business Logic Layer                        │
-│  ┌─────────────────────┐  ┌─────────────────────────────────────┐ │
-│  │   TextCapture       │  │      TranslationService            │ │
-│  │  - Screen capture   │  │  - LibreTranslate API client       │ │
-│  │  - Text extraction  │  │  - Translation requests            │ │
-│  │  - Change detection │  │  - Service availability check      │ │
-│  │  - Translation      │  │  - Error handling                  │ │
-│  │    tracking         │  │                                     │ │
-│  └─────────────────────┘  └─────────────────────────────────────┘ │
-├─────────────────────────────────────────────────────────────────┤
-│                    Configuration Layer                          │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │                    AppConfig                                │ │
-│  │  - Configuration management                                 │ │
-│  │  - JSON file loading/saving                                │ │
-│  │  - Environment variable support                            │ │
-│  │  - Default values                                           │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-├─────────────────────────────────────────────────────────────────┤
-│                     External Dependencies                       │
-│  ┌─────────────────────┐  ┌─────────────────────────────────────┐ │
-│  │  System Clipboard   │  │      LibreTranslate API            │ │
-│  │  - pyautogui        │  │  - HTTP REST API                   │ │
-│  │  - pyperclip        │  │  - JSON request/response           │ │
-│  │  - Screen capture   │  │  - Language detection              │ │
-│  └─────────────────────┘  └─────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-```
-
 ## Class Diagram
 
 ![Class Diagram](diagrams/class_diagram.png)
@@ -157,70 +106,6 @@ Teams Translator follows a modular architecture designed for maintainability, te
 For a high-level overview of the data flow, see this simplified diagram:
 
 ![Simple Data Flow](diagrams/simple_data_flow.png)
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   User starts   │    │   Application   │    │   Display       │
-│   application   │───▶│   initializes   │───▶│   window shows  │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │
-                                ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Countdown     │    │   Mark existing │    │   Start         │
-│   completes     │◀───│   text as       │◀───│   countdown     │
-└─────────────────┘    │   translated    │    │   timer         │
-                       └─────────────────┘    └─────────────────┘
-                                │
-                                ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Translation   │    │   Begin         │    │   Translation   │
-│   loop starts   │◀───│   translation   │───▶│   timer         │
-└─────────────────┘    │   session       │    │   started       │
-                       └─────────────────┘    └─────────────────┘
-                                │
-                                ▼
-        ┌─────────────────────────────────────────────────────────┐
-        │                Translation Loop                          │
-        │                                                         │
-        │  ┌─────────────────┐    ┌─────────────────┐             │
-        │  │   Capture text  │    │   Parse and     │             │
-        │  │   from screen   │───▶│   identify new  │             │
-        │  │   via clipboard │    │   content       │             │
-        │  └─────────────────┘    └─────────────────┘             │
-        │                                │                        │
-        │                                ▼                        │
-        │  ┌─────────────────┐    ┌─────────────────┐             │
-        │  │   Check if      │    │   Determine if  │             │
-        │  │   already       │◀───│   translation   │             │
-        │  │   translated    │    │   needed        │             │
-        │  └─────────────────┘    └─────────────────┘             │
-        │           │                                             │
-        │           ▼                                             │
-        │  ┌─────────────────┐    ┌─────────────────┐             │
-        │  │   Send to       │    │   Call          │             │
-        │  │   LibreTranslate│───▶│   translation   │             │
-        │  │   API           │    │   service       │             │
-        │  └─────────────────┘    └─────────────────┘             │
-        │                                │                        │
-        │                                ▼                        │
-        │  ┌─────────────────┐    ┌─────────────────┐             │
-        │  │   Update        │    │   Cache         │             │
-        │  │   display       │◀───│   translation   │             │
-        │  │   window        │    │   result        │             │
-        │  └─────────────────┘    └─────────────────┘             │
-        │                                │                        │
-        │                                ▼                        │
-        │            ┌─────────────────────────────────┐          │
-        │            │        Wait for next           │          │
-        │            │      translation cycle         │          │
-        │            └─────────────────────────────────┘          │
-        │                                │                        │
-        │                                ▼                        │
-        │            ┌─────────────────────────────────┐          │
-        │            │         Repeat loop            │          │
-        │            └─────────────────────────────────┘          │
-        └─────────────────────────────────────────────────────────┘
-```
 
 ## Sequence Diagram
 
