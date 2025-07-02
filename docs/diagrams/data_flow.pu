@@ -56,48 +56,37 @@ if (Countdown complete?) then (yes)
         note right: Split by speaker marker\nand identify new content
         
         if (New text found?) then (yes)
-            if (Complete line?) then (yes)
-                :Extract complete line;
-                note left: Process finished\nspeaker segment
-            else (no)
-                if (Timeout reached?) then (yes)
-                    :Extract incomplete line;
-                    note right: Force translation\nof partial content
-                else (no)
-                    :Skip translation;
-                    note left: Wait for more\ncomplete content
-                    goto continue
-                endif
-            endif
-            
-            if (Already translated?) then (yes)
-                :Skip translation;
-                note right: Use cached result\nto avoid duplicate API calls
-                goto continue
-            else (no)
-                :Send to LibreTranslate;
-                note left: HTTP POST request\nwith source/target languages
-                
-                if (Translation successful?) then (yes)
-                    :Cache translation;
-                    note right: Store result to\navoid future duplicates
+            if (Complete line or timeout?) then (yes)
+                if (Already translated?) then (no)
+                    :Send to LibreTranslate;
+                    note left: HTTP POST request\nwith source/target languages
                     
-                    :Update display window;
-                    note left: Show translated\ntext in overlay
-                    
-                    :Mark as translated;
-                    note right: Add to processed\ntext tracking
-                else (no)
-                    :Log error;
-                    note left: Record failure\nfor debugging
+                    if (Translation successful?) then (yes)
+                        :Cache translation;
+                        note right: Store result to\navoid future duplicates
+                        
+                        :Update display window;
+                        note left: Show translated\ntext in overlay
+                        
+                        :Mark as translated;
+                        note right: Add to processed\ntext tracking
+                    else (no)
+                        :Log error;
+                        note left: Record failure\nfor debugging
+                    endif
+                else (yes)
+                    :Skip - use cached result;
+                    note right: Avoid duplicate\nAPI calls
                 endif
+            else (no)
+                :Skip - wait for completion;
+                note left: Wait for more\ncomplete content
             endif
         else (no)
             :No action needed;
             note right: No new content\nto process
         endif
         
-        label continue
         :Wait for next cycle;
         note left: Delay based on\nrate_delay setting
         
@@ -109,7 +98,7 @@ if (Countdown complete?) then (yes)
 else (no)
     :Continue countdown;
     note left: Update countdown\ndisplay and wait
-    goto start
+    stop
 endif
 
 stop
