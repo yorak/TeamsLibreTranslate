@@ -3,6 +3,7 @@
 A real-time translation tool for Microsoft Teams meetings that captures live captions and translates them using LibreTranslate.
 
 ![Teams Translator Screenshot](docs/fake_screenshot.png)
+*Illustrative example, not the true app*
 
 ## Features
 
